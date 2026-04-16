@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Презентація: Впровадження Asana у BeaverCraft</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
+        .step-card {
+            transition: all 0.3s ease;
+        }
+        .step-card.active {
+            border-color: #6366f1;
+            background-color: #eef2ff;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.1), 0 2px 4px -1px rgba(99, 102, 241, 0.06);
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-overlay {
+            background-color: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen pb-20">
+
+    <div id="imageModal" class="fixed inset-0 z-[100] hidden modal-overlay flex items-center justify-center p-4 md:p-12" onclick="closeModal()">
+        <button class="absolute top-6 right-6 text-white text-4xl hover:text-indigo-400 transition-colors" onclick="closeModal()">&times;</button>
+        <img id="modalImage" src="" alt="Збільшене зображення" class="max-w-full max-h-full rounded-lg shadow-2xl scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+    </div>
+
+    <header class="bg-white border-b border-slate-200 pt-16 pb-12 px-4 sm:px-6 lg:px-8 shadow-sm">
+        <div class="max-w-5xl mx-auto">
+            <div class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm font-semibold mb-6">
+                🚀 Пропозиція: Оптимізація процесів
+            </div>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight mb-6">
+                Масштабування ефективності: Перехід BeaverCraft на Asana
+            </h1>
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 mb-8 relative overflow-hidden text-balance">
+                <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
+                <h2 class="text-lg font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                    <span>💡</span> TL;DR (Коротко про головне)
+                </h2>
+                <p class="text-slate-600 leading-relaxed text-lg">
+                    Пілотний запуск Asana у відділі контенту BeaverCraft виявив критичну нестачу системності у загальних робочих процесах та продемонстрував шлях до її вирішення. Інтеграція платформи з MS Teams та налаштування автоматизації ліквідували хаос у комунікаціях і таблицях. Переведення команди в єдине середовище та впроваджена двостороння синхронізація <strong>зекономили 80 годин щомісяця</strong> та звели до нуля помилки. Ця презентація пропонує масштабувати цей успішний підхід на інші підрозділи компанії.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Пілотний запуск</p>
+                    <p class="font-medium text-slate-800">Відділ контенту</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Економія ресурсу</p>
+                    <p class="font-bold text-indigo-600">~80 год / міс</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Звітність для CEO</p>
+                    <p class="font-medium text-slate-800">100% Автоматична</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Новий Workflow</p>
+                    <p class="font-medium text-emerald-600">Zero Copy-Paste</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 space-y-20">
+
+        <section>
+            <div class="mb-8 text-center">
+                <h2 class="text-2xl font-bold text-slate-900 mb-4">Від хаосу до керованої ефективності</h2>
+                <p class="text-slate-600 max-w-2xl mx-auto text-balance">Аналіз поточних процесів виявив, що співробітники витрачають більше часу на адміністрування та пошук інформації, ніж на створення безпосередньої цінності продукту. Це сигнал для радикальних змін.</p>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="flex border-b border-slate-200">
+                    <button id="btn-before" class="flex-1 py-4 px-6 text-center font-semibold text-rose-600 border-b-2 border-rose-500 bg-rose-50/30 transition-colors">
+                        🛑 До: Адміністративний параліч
+                    </button>
+                    <button id="btn-after" class="flex-1 py-4 px-6 text-center font-medium text-slate-500 border-b-2 border-transparent hover:bg-slate-50 transition-colors">
+                        💡 Після: Автоматизований фокус
+                    </button>
+                </div>
+                
+                <div class="p-8 min-h-[300px]" id="comparison-content">
+                    <div id="content-before" class="fade-in">
+                        <div class="grid md:grid-cols-2 gap-8 text-balance">
+                            <div>
+                                <h4 class="font-semibold text-slate-700 mb-3 border-b pb-2">Поточна щоденна рутина:</h4>
+                                <ul class="space-y-3">
+                                    <li class="flex gap-3"><span class="text-rose-500">❌</span> <span class="text-slate-600">Завдання ставляться в Telegram-чатах (інформація губиться).</span></li>
+                                    <li class="flex gap-3"><span class="text-rose-500">❌</span> <span class="text-slate-600">Пошук ТЗ розкиданий по 6+ різних Google Таблицях та списках Teams.</span></li>
+                                    <li class="flex gap-3"><span class="text-rose-500">❌</span> <span class="text-slate-600">Ручне копіювання посилань на результати роботи у звіти.</span></li>
+                                    <li class="flex gap-3"><span class="text-rose-500">❌</span> <span class="text-slate-600">Постійне перепитування технічних деталей та статусів у Teams.</span></li>
+                                </ul>
+                            </div>
+                            <div class="bg-rose-50 rounded-xl p-5 border border-rose-100 flex flex-col justify-center text-center">
+                                <div class="text-rose-600 text-4xl font-bold mb-2">~5 год</div>
+                                <p class="text-rose-800 font-medium text-balance">ручної адміністративної роботи на кожного учасника щотижня</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="content-after" class="hidden fade-in">
+                        <div class="grid md:grid-cols-3 gap-4 mb-8 text-balance">
+                            <div class="bg-indigo-50/50 p-5 rounded-xl border border-indigo-100">
+                                <h4 class="font-semibold text-indigo-900 mb-2">Єдина точка входу</h4>
+                                <p class="text-sm text-indigo-700">Asana агрегує всі запити з різних відділів. Команді виконавців більше не потрібно відкривати розрізнені таблиці замовників.</p>
+                            </div>
+                            <div class="bg-indigo-50/50 p-5 rounded-xl border border-indigo-100">
+                                <h4 class="font-semibold text-indigo-900 mb-2">Інтегрована база знань</h4>
+                                <p class="text-sm text-indigo-700">Технічні вимоги вбудовані безпосередньо в кожен проєкт, що ліквідує потребу в постійних уточненнях.</p>
+                            </div>
+                            <div class="bg-indigo-50/50 p-5 rounded-xl border border-indigo-100">
+                                <h4 class="font-semibold text-indigo-900 mb-2">Миттєва аналітика</h4>
+                                <p class="text-sm text-indigo-700">100% автоматизована звітність. Керівництво отримує актуальні цифри щодо KPI без ручного збору даних.</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-100">
+                            <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>📸</span> Інтерфейси нового робочого простору:</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <img src="Screenshot 2026-03-25 at 12.13.25.jpg" alt="Дошка Asana 1" class="rounded-xl border border-slate-200 shadow-sm w-full object-cover aspect-video hover:scale-105 transition-transform cursor-zoom-in" onclick="openModal(this.src)">
+                                <img src="Screenshot 2026-03-25 at 12.15.00.jpg" alt="Дошка Asana 2" class="rounded-xl border border-slate-200 shadow-sm w-full object-cover aspect-video hover:scale-105 transition-transform cursor-zoom-in" onclick="openModal(this.src)">
+                                <img src="Screenshot 2026-03-25 at 12.16.05.jpg" alt="Дошка Asana 3" class="rounded-xl border border-slate-200 shadow-sm w-full object-cover aspect-video hover:scale-105 transition-transform cursor-zoom-in" onclick="openModal(this.src)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-900 mb-4">Технічний Workflow: Як працює система</h2>
+                <p class="text-slate-600 text-balance">Основа рішення — це не просто новий інструмент, а кастомна інтеграція. Скрипти працюють як "невидимі асистенти", повністю перебираючи на себе ручну синхронізацію даних між відділами.</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="md:w-1/3 flex flex-col gap-4">
+                    <button class="step-card active text-left p-5 rounded-xl border border-slate-200 bg-white cursor-pointer relative" onclick="showStep(1, this)">
+                        <div class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold border-4 border-white">1</div>
+                        <h4 class="font-bold text-slate-800 mb-1">Агрегація запитів</h4>
+                        <p class="text-xs text-slate-500 uppercase tracking-wide">Sheets ➡️ Asana</p>
+                    </button>
+                    <div class="hidden md:flex justify-center text-slate-300">⬇️</div>
+                    <button class="step-card text-left p-5 rounded-xl border border-slate-200 bg-white cursor-pointer relative" onclick="showStep(2, this)">
+                        <div class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold border-4 border-white step-num">2</div>
+                        <h4 class="font-bold text-slate-800 mb-1">Прозора робота команди</h4>
+                        <p class="text-xs text-slate-500 uppercase tracking-wide">Фокус на результаті</p>
+                    </button>
+                    <div class="hidden md:flex justify-center text-slate-300">⬇️</div>
+                    <button class="step-card text-left p-5 rounded-xl border border-slate-200 bg-white cursor-pointer relative" onclick="showStep(3, this)">
+                        <div class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold border-4 border-white step-num">3</div>
+                        <h4 class="font-bold text-slate-800 mb-1">Зворотна синхронізація</h4>
+                        <p class="text-xs text-slate-500 uppercase tracking-wide">Asana ➡️ Sheets</p>
+                    </button>
+                </div>
+
+                <div class="md:w-2/3 bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm flex items-center">
+                    <div id="step-details" class="fade-in w-full">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="text-3xl">📋</span>
+                            <h3 class="text-xl font-bold text-slate-800">Крок 1: Агрегація запитів без участі людини</h3>
+                        </div>
+                        <ul class="space-y-4 text-slate-600 mt-6 mb-6 text-balance">
+                            <li class="flex items-start gap-3">
+                                <span class="text-indigo-500 mt-1">▪️</span>
+                                <div>За допомогою спеціально розроблених <strong>Apps Script</strong> побудовані автоматичні зв'язки між таблицями відділів та середовищем Asana.</div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="text-indigo-500 mt-1">▪️</span>
+                                <div>Замовники (напр. SMM, маркетинг) продовжують працювати у звичних для них таблицях, але їхні запити миттєво перетворюються на структуровані задачі для виконавців.</div>
+                            </li>
+                        </ul>
+                        <img src="Screenshot 2026-03-25 at 12.34.06.jpg" alt="Google Apps Script Code" class="rounded-lg border border-slate-200 shadow-sm w-full object-cover cursor-zoom-in" onclick="openModal(this.src)">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-900 mb-4 text-balance">Бізнес-результати: Економія як драйвер зростання</h2>
+                <p class="text-slate-600 text-balance">Автоматизація — це не просто зручність для персоналу, це оптимізація витрат компанії. Впроваджена система дозволила вивільнити колосальний часовий ресурс.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8 text-balance">
+                <div class="lg:col-span-1 space-y-4">
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-5">
+                        <div class="text-emerald-600 text-3xl font-black mb-1">~80 год</div>
+                        <div class="text-emerald-800 font-semibold text-sm uppercase tracking-wide mb-2">Місячний ресурс відділу</div>
+                        <p class="text-emerald-700/80 text-sm">Час, який раніше марнувався на рутинне "перекидання" посилань та актуалізацію статусів.</p>
+                    </div>
+                    
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-5">
+                        <div class="text-indigo-600 text-3xl font-black mb-1">100%</div>
+                        <div class="text-indigo-800 font-semibold text-sm uppercase tracking-wide mb-2">Прозорість процесів</div>
+                        <p class="text-indigo-700/80 text-sm">Інструмент для миттєвого моніторингу завантаженості відділів. Формування звітів займає 0 хвилин.</p>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 shadow-sm rounded-xl p-5">
+                        <div class="text-slate-800 font-semibold text-sm uppercase tracking-wide mb-2">🚀 KPI на базі даних</div>
+                        <p class="text-slate-600 text-sm">Можливість відстежувати реальні KPI: кількість та складність виконаних задач, відсоток дотримання дедлайнів.</p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-center">
+                    <h3 class="text-center font-semibold text-slate-800 mb-6">Динаміка витрат часу команди на адміністрування (год / тиждень)</h3>
+                    <div class="chart-container">
+                        <canvas id="impactChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-slate-100">
+                <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2"><span>📸</span> Додаткові інфраструктурні покращення:</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm font-medium text-slate-600 mb-2">Новий стандарт зберігання на Google Drive:</p>
+                        <img src="Screenshot 2026-03-25 at 12.46.54.png" alt="Google Drive Structure" class="rounded-xl border border-slate-200 shadow-sm w-full object-cover hover:scale-[1.01] transition-transform cursor-zoom-in" onclick="openModal(this.src)">
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-600 mb-2">Система авто-оновлення таблиць замовників:</p>
+                        <img src="Screenshot 2026-03-25 at 12.38.27.jpg" alt="Google Sheets Automation" class="rounded-xl border border-slate-200 shadow-sm w-full object-cover hover:scale-[1.01] transition-transform cursor-zoom-in" onclick="openModal(this.src)">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-20 translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500 rounded-full blur-3xl opacity-20 -translate-x-1/2 translate-y-1/2"></div>
+            
+            <h2 class="text-2xl sm:text-3xl font-bold mb-6 relative z-10">🚀 Стратегічний крок для BeaverCraft</h2>
+            <p class="text-slate-300 text-lg max-w-3xl mx-auto leading-relaxed relative z-10 text-balance">
+                Автоматизація рутини дозволяє командам повернутися до своєї основної мети — <strong>створення якісного продукту та масштабування бренду</strong>. Пілотний проєкт вже економить 15-20 годин на тиждень лише в одному відділі, усунувши необхідність "перемикання" між 5+ сервісами. Інтеграція Asana в інші підрозділи BeaverCraft створить єдиний, прозорий та ефективний механізм роботи всієї компанії.
+            </p>
+        </section>
+
+    </main>
+
+    <script>
+        function openModal(src) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modalImg.src = src;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalImg.classList.remove('scale-95');
+                modalImg.classList.add('scale-100');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modalImg.classList.add('scale-95');
+            modalImg.classList.remove('scale-100');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+            document.body.style.overflow = 'auto';
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        const btnBefore = document.getElementById('btn-before');
+        const btnAfter = document.getElementById('btn-after');
+        const contentBefore = document.getElementById('content-before');
+        const contentAfter = document.getElementById('content-after');
+
+        btnBefore.addEventListener('click', () => {
+            btnBefore.className = "flex-1 py-4 px-6 text-center font-semibold text-rose-600 border-b-2 border-rose-500 bg-rose-50/30 transition-colors";
+            btnAfter.className = "flex-1 py-4 px-6 text-center font-medium text-slate-500 border-b-2 border-transparent hover:bg-slate-50 transition-colors";
+            contentBefore.classList.remove('hidden');
+            contentAfter.classList.add('hidden');
+            contentBefore.classList.remove('fade-in');
+            void contentBefore.offsetWidth;
+            contentBefore.classList.add('fade-in');
+        });
+
+        btnAfter.addEventListener('click', () => {
+            btnAfter.className = "flex-1 py-4 px-6 text-center font-semibold text-indigo-600 border-b-2 border-indigo-500 bg-indigo-50/30 transition-colors";
+            btnBefore.className = "flex-1 py-4 px-6 text-center font-medium text-slate-500 border-b-2 border-transparent hover:bg-slate-50 transition-colors";
+            contentAfter.classList.remove('hidden');
+            contentBefore.classList.add('hidden');
+            contentAfter.classList.remove('fade-in');
+            void contentAfter.offsetWidth;
+            contentAfter.classList.add('fade-in');
+        });
+
+        const workflowSteps = {
+            1: {
+                title: "Крок 1: Агрегація запитів без участі людини",
+                icon: "📋",
+                points: [
+                    "За допомогою кастомних <strong>Apps Script</strong> побудовані зв'язки між 6+ існуючими таблицями та списками з MS Teams.",
+                    "Замовники залишаються у своїх звичних таблицях, але їхні дані автоматично трансформуються у структуровані задачі в Asana.",
+                    "Скрипт самостійно сортує запити по відповідних проєктах (SMM, Marketing, RnD), ліквідуючи хаос та втрату інформації."
+                ],
+                images: ["Screenshot 2026-03-25 at 12.34.06.jpg"]
+            },
+            2: {
+                title: "Крок 2: Прозора робота команди",
+                icon: "🎯",
+                points: [
+                    "Створено чітку структуру: для кожного відділу-замовника в Asana налаштовано окремий проєкт, куди система автоматично стягує задачі.",
+                    "Кожен проєкт містить внутрішню базу знань з технічними вимогами. Це кардинально зменшує кількість уточнюючих питань у чатах.",
+                    "Співробітники бачать всі свої задачі на єдиній персоналізованій панелі (список, календар, канбан) і працюють виключно в Asana, не відволікаючись на інші сервіси."
+                ],
+                images: ["Screenshot 2026-03-25 at 12.14.15.jpg", "Screenshot 2026-03-25 at 12.15.48.jpg", "Screenshot 2026-03-25 at 12.16.05.jpg"]
+            },
+            3: {
+                title: "Крок 3: Зворотна синхронізація",
+                icon: "🔄",
+                points: [
+                    "Результати роботи завантажуються у чітко структуроване середовище на Google Drive із стандартизованим неймінгом файлів.",
+                    "Виконавець просто додає посилання на готовий файл у задачу в Asana і закриває її кліком на 'Complete'.",
+                    "Автоматика фіксує цю дію, знаходить відповідний рядок у вихідній таблиці замовника, вставляє туди посилання на файл та змінює статус на 'Виконано'."
+                ],
+                images: ["Screenshot 2026-03-25 at 12.38.27.jpg"]
+            }
+        };
+
+        function showStep(stepId, element) {
+            document.querySelectorAll('.step-card').forEach(card => {
+                card.classList.remove('active');
+                let numBadge = card.querySelector('.step-num, div:first-child');
+                numBadge.classList.remove('bg-indigo-600', 'text-white');
+                numBadge.classList.add('bg-slate-200', 'text-slate-600');
+            });
+            element.classList.add('active');
+            let activeBadge = element.querySelector('div:first-child');
+            activeBadge.classList.remove('bg-slate-200', 'text-slate-600');
+            activeBadge.classList.add('bg-indigo-600', 'text-white');
+            const detailsContainer = document.getElementById('step-details');
+            const data = workflowSteps[stepId];
+            let pointsHtml = data.points.map(point => `<li class="flex items-start gap-3"><span class="text-indigo-500 mt-1">▪️</span><div>${point}</div></li>`).join('');
+            let imagesHtml = '';
+            if (data.images && data.images.length > 0) {
+                let imgTags = data.images.map(img => `<img src="${img}" alt="Ілюстрація" class="rounded-lg border border-slate-200 shadow-sm w-full object-cover aspect-auto hover:scale-[1.02] transition-transform cursor-zoom-in" onclick="openModal(this.src)">`).join('');
+                imagesHtml = `<div class="mt-6 flex flex-col gap-4">${imgTags}</div>`;
+            }
+            detailsContainer.innerHTML = `<div class="flex items-center gap-3 mb-4"><span class="text-3xl">${data.icon}</span><h3 class="text-xl font-bold text-slate-800">${data.title}</h3></div><ul class="space-y-4 text-slate-600 mt-6">${pointsHtml}</ul>${imagesHtml}`;
+            detailsContainer.classList.remove('fade-in');
+            void detailsContainer.offsetWidth; 
+            detailsContainer.classList.add('fade-in');
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const ctx = document.getElementById('impactChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['До (Ручний менеджмент)', 'Після (Автоматизація Asana)'],
+                    datasets: [{
+                        label: 'Години на адміністрування',
+                        data: [25, 2], 
+                        backgroundColor: ['rgba(244, 63, 94, 0.8)', 'rgba(16, 185, 129, 0.8)'],
+                        borderColor: ['rgb(225, 29, 72)', 'rgb(5, 150, 105)'],
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        barPercentage: 0.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: 'Години / тиждень' },
+                            grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
